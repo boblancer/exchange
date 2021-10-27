@@ -1,0 +1,24 @@
+{
+  "name": "zipmex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@types/node": "^16.11.6",
+    "sorted-btree": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^3.0.3",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.4"
+  },
+  "scripts": {
+    "start": "tsnd fake-api/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "watch": [
+    "src"
+  ]
+}
