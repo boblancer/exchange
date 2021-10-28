@@ -9,83 +9,112 @@ class OrderBook {
     buyTree: BTree;
     sellTree: BTree;
 
-    constructor(name: string, share_precision: number=10^6) {
+    constructor(name: string, sharePrecision: number=1) {
         this.assetName = name
-        this.decimalPrecision = share_precision
+        this.decimalPrecision = sharePrecision
 
-        this.buyTree = new BTree(undefined, Limit.compareIncreasing)
-        this.sellTree = new BTree(undefined, Limit.compareDecreasing)
+        this.buyTree = new BTree(undefined, Limit.compareDecreasing)
+        this.sellTree = new BTree(undefined, Limit.compareIncreasing)
     }
     
-    fillOrder(shares: number, limit: number): number {
-        let targetShare = shares
-        let currentlyOwn = 0
-        let leftoverQuota = 0
+    fillOrder(targetShares: number, limit: number): number {
+        console.log("filling order")
+        console.log("=====================================")
+        console.log(this.sellTree)
+        console.log("=====================================")
 
-        while( this.sellTree[limit] != undefined 
-            && currentlyOwn < targetShare ){
-            let lowest_sell_limit = this.sellTree[this.sellTree.minKey()]
-            let available_share = lowest_sell_limit.availableShare()
+        let currentlyOwn = 0
+        let residue = 0
+
+
+        while( currentlyOwn < targetShares ){
+            let lowestLimit = this.sellTree.get(this.sellTree.minKey())
+            let availableShare = lowestLimit.availableShare()
             
-            if (lowest_sell_limit.limitPrice <= limit){
-                let buy_amount = (
-                    targetShare >= available_share 
-                    ? available_share : targetShare
+            if (lowestLimit.limitPrice() <= limit){
+                let buyAmount = (
+                    targetShares - currentlyOwn >= availableShare 
+                    ? availableShare : targetShares - currentlyOwn
                 )
-                lowest_sell_limit.buy(buy_amount)
-                currentlyOwn += buy_amount
-                leftoverQuota += limit - lowest_sell_limit.limitPrice() * targetShare
+
+                lowestLimit.buy(buyAmount)
+                currentlyOwn += buyAmount
+
+                residue += (limit - lowestLimit.limitPrice()) * buyAmount
+                console.log("Buying low", buyAmount, "own ", currentlyOwn, residue, "lowest", lowestLimit.limitPrice())
             }
-            else if (lowest_sell_limit.limitPrice > limit
-                && leftoverQuota > 0){
-                let buy_amount = (
-                    targetShare >= available_share 
-                    ? available_share : targetShare
+            else if (lowestLimit.limitPrice() > limit
+                && residue > 0){
+                let priceDifference = lowestLimit.limitPrice - limit
+                let buyAmountFromResidue = priceDifference / residue
+                let buyAmount = (
+                    buyAmountFromResidue >= availableShare 
+                    ? availableShare : buyAmountFromResidue
                 )
+
+                lowestLimit.buy(buyAmount)
+                currentlyOwn += buyAmount
+                residue -= priceDifference * buyAmount
+                console.log("Buying extra", buyAmount, "own ", currentlyOwn, residue)
             }
         }
-        return 0;
+        return targetShares - currentlyOwn;
     }
 
-    createNewBuyOrder(shares: number, limit: number) {
+    createNewOrder(shares: number, limit: number, tree: BTree) {
         // Create new limit node and assign it to buyTree
-        if (this.buyTree[limit] == undefined){
-            let order = new Order (true, shares)
+        let limitStr = String(limit)
+
+        if (!tree.has(limitStr)){
+            let order = new Order (shares)
             let new_limit = new Limit(order, limit)
-            this.buyTree[limit] = new_limit
+            
+            tree.set(limitStr, new_limit)
         }
          // Push new Order to limit Node
-        else if (this.buyTree[limit] != undefined){
-            this.buyTree[limit].push_last(
-                new Order(true, shares)
+        else if (tree.has(limitStr)){
+            tree.get(limitStr).pushLast(
+                new Order(shares)
             )
         }
     }
 
     processBuyOrder(shares: number, limit: number) {
         var unbrought_share = shares
-        var min_key = this.sellTree.minKey()
-        if (min_key != undefined){
-            if (limit > this.sellTree[min_key].limitPrice){
+        var minKey = this.sellTree.minKey()
+        if (minKey != undefined){
+            if (limit >= this.sellTree.get(minKey).limitPrice()){
                 let leftover_unbrought = this.fillOrder(shares, limit)
                 
             }
         }
-        this.createNewBuyOrder(unbrought_share, limit)
+        this.createNewOrder(unbrought_share, limit, this.buyTree)
     }
 
-    private process_sell_order(shares: number, limit: number) {
+    processSellOrder(shares: number, limit: number) {
+        var unsold_share = shares
+        var maxKey = this.buyTree.maxKey()
+        // if (maxKey != undefined){
+        //     if (limit > this.sellTree.get(maxKey).limitPrice){
+        //         let leftover_unbrought = this.fillOrder(shares, limit)
+                
+        //     }
+        // }
+        this.createNewOrder(unsold_share, limit, this.sellTree)
     }
 
     // Handle sha
     processOrder(order: OrderRequest) {
-        let share = Math.trunc(order.shares * this.decimalPrecision)
+        // let share = Math.trunc(order.shares * this.decimalPrecision)
+        // let limit = Math.trunc(order.limit * this.decimalPrecision)
+        let share = order.shares
+        let limit = order.limit
         switch(order.command) {
             case "buy":
-                this.processBuyOrder(share, order.limit)
+                this.processBuyOrder(share, limit)
               break;
             case "sell":
-                this.process_sell_order(share, order.limit)
+                this.processSellOrder(share, limit)
               break;
             default:
                 console.log("Invalid command")

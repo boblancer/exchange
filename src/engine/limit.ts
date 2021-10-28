@@ -41,19 +41,19 @@ export class Limit {
         // + Additional buy logic
     }
 
-    static compareIncreasing(a: Limit, b: Limit): number {
-        if (a.limitPrice > b.limitPrice)
+    static compareIncreasing(a: number, b: number): number {
+        if (a > b)
             return 1; 
-        else if (a.limitPrice < b.limitPrice)
+        else if (a < b)
             return -1;
 
         return 0
     }
 
-    static compareDecreasing(a: Limit, b: Limit): number {
-        if (a.limitPrice > b.limitPrice)
+    static compareDecreasing(a: number, b: number): number {
+        if (a > b)
             return -1; 
-        else if (a.limitPrice < b.limitPrice)
+        else if (a < b)
             return 1;
 
         return 0
