@@ -2,11 +2,17 @@ import BTree from 'sorted-btree'
 import { OrderRequest } from '../api/model/order_request';
 import { Limit } from './limit';
 
+enum Command {
+    Buy,
+    Sell,
+}
+
 class OrderBook {
     decimalPrecision: number;
     assetName: string;
     buyTree: BTree;
     sellTree: BTree;
+
 
     constructor(name: string, sharePrecision: number=1000) {
         this.assetName = name
@@ -15,16 +21,45 @@ class OrderBook {
         this.buyTree = new BTree(undefined, Limit.compareDecreasing)
         this.sellTree = new BTree(undefined, Limit.compareIncreasing)
     }
-    
-    fillBuyOrder(targetShares: number, limit: number): number {
+
+    private getOppositeTree(command: Command): BTree{
+        switch(command) {
+            case Command.Buy:
+              return this.sellTree
+            case Command.Sell:
+              return this.buyTree
+          }
+    }
+    private getTree(command: Command): BTree{
+        switch(command) {
+            case Command.Buy:
+              return this.buyTree
+            case Command.Sell:
+              return this.sellTree
+          }
+    }
+
+    private matchExitCondition(nextMatch: number, limit: number, command: Command){
+        switch(command) {
+            case Command.Buy:
+              return nextMatch > limit
+            case Command.Sell:
+              return nextMatch < limit
+          }
+    }
+
+    fillOrder(targetShares: number, limit: number, command: Command): number {
         let current = 0
+        let targetTree = this.getOppositeTree(command)
 
         while( current < targetShares ){
-            let key = this.sellTree.minKey()
-            let lowestLimit = this.sellTree.get(key)
-            let availableShare = lowestLimit.availableShare()
+            let key = targetTree.minKey()
+            let nextMatch = targetTree.get(key)
+            let availableShare = nextMatch.availableShare()
 
-            if (lowestLimit.limitPrice() > limit){
+            if (this.matchExitCondition(
+                nextMatch.limitPrice(), limit, command
+                )){
                 break
             }
 
@@ -33,39 +68,11 @@ class OrderBook {
                 ? availableShare : targetShares - current
             )
 
-            lowestLimit.removeShare(orderAmount)
+            nextMatch.removeShare(orderAmount)
             current += orderAmount
 
             if (orderAmount == availableShare){
-                this.sellTree.delete(key)
-            }
-            
-        }
-        return targetShares - current;
-    }
-
-    fillSellOrder(targetShares: number, limit: number): number {
-        let current = 0
-        while( current < targetShares ){
-            let key = this.buyTree.minKey()
-            let nextBestDeal = this.buyTree.get(key)
-            let availableShare = nextBestDeal.availableShare()
-            
-            if (nextBestDeal.limitPrice() < limit){
-                break
-            }
-            let buyAmount = (
-                targetShares - current >= availableShare 
-                ? availableShare : targetShares - current
-            )
-            console.log("fillign sell order ", nextBestDeal.limitPrice(), limit, buyAmount)
-
-            nextBestDeal.removeShare(buyAmount)
-            current += buyAmount
-            
-            console.log(buyAmount == availableShare, "buy all deleteing ")
-            if (buyAmount == availableShare){
-                this.buyTree.delete(key)
+                targetTree.delete(key)
             }
             
         }
@@ -86,44 +93,32 @@ class OrderBook {
         }
     }
 
-    processBuyOrder(shares: number, limit: number) {
-        var unbroughtShare = shares
-        var minKey = this.sellTree.minKey()
-        if (minKey != undefined &&
-            limit >= this.sellTree.get(minKey).limitPrice()){
-            unbroughtShare = this.fillBuyOrder(shares, limit)
-        }
-        if (unbroughtShare > 0){
-            this.createNewOrder(unbroughtShare, limit, this.buyTree)
-        }
-    }
-
-    processSellOrder(shares: number, limit: number) {
+    processOrder(shares: number, limit: number, command: Command) {
         var unsold_share = shares
-        var maxKey = this.buyTree.minKey()
+        var oppositeTree = this.getOppositeTree(command)
+        var rootKey = oppositeTree.minKey()
         
-        if (maxKey != undefined &&
-            limit <= this.buyTree.get(maxKey).limitPrice()){
-            unsold_share = this.fillSellOrder(shares, limit)
-            
+        if (rootKey != undefined &&
+            limit <= oppositeTree.get(rootKey).limitPrice()){
+            unsold_share = this.fillOrder(shares, limit, command)
         }
         if (unsold_share > 0){
-            this.createNewOrder(unsold_share, limit, this.sellTree)
+            this.createNewOrder(unsold_share, limit, this.getTree(command))
         }
     }
 
     // Handle sha
-    processOrder(order: OrderRequest) {
+    processInput(order: OrderRequest) {
         let share = Math.trunc(order.amount * this.decimalPrecision)
         let limit = Math.trunc(order.price * this.decimalPrecision)
         // let limit = new number(order.price)
         // let share = new number(order.amount)
         switch(order.command) {
             case "buy":
-                this.processBuyOrder(share, limit)
+                this.processOrder(share, limit, Command.Buy)
               break;
             case "sell":
-                this.processSellOrder(share, limit)
+                this.processOrder(share, limit, Command.Sell)
               break;
             default:
                 console.log("Invalid command")

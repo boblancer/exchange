@@ -1,5 +1,4 @@
 import Decimal from "decimal.js";
-import { Order } from "./order";
 
 export class Limit {
     private _limitPrice: number;

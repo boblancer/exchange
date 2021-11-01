@@ -1,10 +1,6 @@
-import Decimal from "decimal.js"
 import BTree, { simpleComparator } from "sorted-btree"
 import { OrderRequest } from "./api/model/order_request"
-import { Limit } from "./engine/limit"
-import { Order } from "./engine/order"
 import OrderBook from "./engine/order_book"
-
 
 function printT(tree: BTree){
     tree.forEachPair((key, value, index) => {
@@ -16,7 +12,7 @@ function printT(tree: BTree){
 function batchOrder(input: string[], o: OrderBook){
     input.forEach(s => {
         const or: OrderRequest = JSON.parse(s)
-        o.processOrder(or)
+        o.processInput(or)
     });
 }
 
