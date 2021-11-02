@@ -21,8 +21,9 @@ Run with docker
 ![image](https://user-images.githubusercontent.com/40311101/139872062-cfb835c8-1a33-4240-9649-9afb26e59d24.png)
 
 ## Internal API Reference
-
-#### Operation Runtime Complexity current in use
+#### Flowchart
+![image](https://lucid.app/lucidchart/636a735a-e3cc-4487-81f9-4048e8da1371/edit?viewport_loc=-1320%2C-409%2C3591%2C1840%2C0eqBfotfVGlV&invitationId=inv_9feb5a49-d932-4692-bb8e-8ab5e313eb82)
+#### Operation runtime complexity currently in use
 
 | Operation | Cost     | Used In                |
 | :-------- | :------- | :------------------------- |
