@@ -14,7 +14,7 @@ Run with docker
 
 ## Library **(npm)**
 
- - Mocha **(Testing)**
+ - Mocha, Sinon **(Testing)**
  - sorted-btree **(B+ tree for internal storage)**
 
 ## Test Suite
