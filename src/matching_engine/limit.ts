@@ -1,6 +1,4 @@
-import Decimal from "decimal.js";
-
-export class Limit {
+export default class Limit {
     private _limitPrice: number;
     private _totalVolume: number;
 
@@ -25,23 +23,6 @@ export class Limit {
         this._totalVolume -= share
     }
 
-    // static compareIncreasing(a: string, b: string): number {
-    //     if (parseFloat(a) > parseFloat(b))
-    //         return 1; 
-    //     else if (parseFloat(a) < parseFloat(b))
-    //         return -1;
-
-    //     return 0
-    // }
-
-    // static compareDecreasing(a: string, b: string): number {
-    //     if (parseFloat(a) > parseFloat(b))
-    //         return -1; 
-    //     else if (parseFloat(a) < parseFloat(b))
-    //         return 1;
-
-    //     return 0
-    // }
     static compareIncreasing(a: number, b: number): number {
         if (a > b)
             return 1; 

@@ -1,6 +1,6 @@
 import BTree, { simpleComparator } from "sorted-btree"
 import { OrderRequest } from "./api/model/order_request"
-import OrderBook from "./engine/order_book"
+import OrderBook from "./matching_engine/order_book"
 
 function printT(tree: BTree){
     tree.forEachPair((key, value, index) => {
@@ -12,7 +12,7 @@ function printT(tree: BTree){
 function batchOrder(input: string[], o: OrderBook){
     input.forEach(s => {
         const or: OrderRequest = JSON.parse(s)
-        o.processInput(or)
+        o.processInputCommand(or)
     });
 }
 

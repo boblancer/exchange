@@ -1,6 +1,6 @@
 import BTree from 'sorted-btree'
 import { OrderRequest } from '../api/model/order_request';
-import { Limit } from './limit';
+import Limit from './limit';
 
 enum Command {
     Buy,
@@ -14,7 +14,7 @@ class OrderBook {
     sellTree: BTree;
 
 
-    constructor(name: string, sharePrecision: number=1000) {
+    constructor(name: string="Asset", sharePrecision: number=10**3) {
         this.assetName = name
         this.decimalPrecision = sharePrecision
 
@@ -94,25 +94,22 @@ class OrderBook {
     }
 
     processOrder(shares: number, limit: number, command: Command) {
-        var unsold_share = shares
+        var targetShares = shares
         var oppositeTree = this.getOppositeTree(command)
         var rootKey = oppositeTree.minKey()
         
         if (rootKey != undefined &&
             limit <= oppositeTree.get(rootKey).limitPrice()){
-            unsold_share = this.fillOrder(shares, limit, command)
+            targetShares = this.fillOrder(shares, limit, command)
         }
-        if (unsold_share > 0){
-            this.createNewOrder(unsold_share, limit, this.getTree(command))
+        if (targetShares > 0){
+            this.createNewOrder(targetShares, limit, this.getTree(command))
         }
     }
 
-    // Handle sha
-    processInput(order: OrderRequest) {
+    processInputCommand(order: OrderRequest) {
         let share = Math.trunc(order.amount * this.decimalPrecision)
         let limit = Math.trunc(order.price * this.decimalPrecision)
-        // let limit = new number(order.price)
-        // let share = new number(order.amount)
         switch(order.command) {
             case "buy":
                 this.processOrder(share, limit, Command.Buy)
