@@ -29,8 +29,8 @@ Run with docker
 
 | Operation | Cost     | Used In                |
 | :-------- | :------- | :------------------------- |
-| Insert        | `O(log M)` | **_createNewOrder()** |
-| Delete(Root)  | `O(1)`   | **_fillOrder()** |
+| Insert        | `O(log n)` | **_createNewOrder()** |
+| Delete(Root)  | `O(t log n)`   | **_fillOrder()** |
 | Find(Root)    | `O(1)`   | **_fillOrder()** & **_processOrder()** |
 
 #### Internal data storage
