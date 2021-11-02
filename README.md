@@ -18,7 +18,7 @@ Run with docker
  - sorted-btree **(B+ tree for internal storage)**
 
 ## Test Suite
-![image](https://user-images.githubusercontent.com/40311101/139871938-fec1ed50-48ad-45f6-b79a-64287a40ccac.png)
+![image](https://user-images.githubusercontent.com/40311101/139872062-cfb835c8-1a33-4240-9649-9afb26e59d24.png)
 
 ## References
 
