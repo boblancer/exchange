@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "dependencies": {
     "@types/node": "^16.11.6",
+    "faker": "^5.5.3",
+    "sinon": "^11.1.2",
     "sorted-btree": "^1.6.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node-fetch": "^3.0.3",
-    "chai": "^4.3.4",
     "mocha": "^9.1.3",
     "mocha-junit-reporter": "^2.0.2",
     "ts-node": "^10.4.0",
@@ -20,7 +20,7 @@
   },
   "scripts": {
     "start": "tsnd fake-api/server.ts",
-    "test": "$Env:TS_NODE_COMPILER_OPTIONS = '{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'"
+    "test": "TS_NODE_COMPILER_OPTIONS='{'module': 'commonjs'}' && ./node_modules/mocha/bin/mocha -r ts-node/register 'tests/**/*.ts'"
   },
   "author": "",
   "license": "ISC",

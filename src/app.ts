@@ -1,6 +1,6 @@
 import BTree, { simpleComparator } from "sorted-btree"
 import { OrderRequest } from "./api/model/order_request"
-import OrderBook from "./matching_engine/order_book"
+import OrderBook, { Command } from "./matching_engine/order_book"
 
 function printT(tree: BTree){
     tree.forEachPair((key, value, index) => {
@@ -12,7 +12,7 @@ function printT(tree: BTree){
 function batchOrder(input: string[], o: OrderBook){
     input.forEach(s => {
         const or: OrderRequest = JSON.parse(s)
-        o.processInputCommand(or)
+        o.processCommand(or)
     });
 }
 
@@ -69,7 +69,9 @@ let c2 = [
  console.log("SELL ===================")
 
 
- console.log(o.sellTree, o.buyTree.minKey(), o.sellTree.minKey())
+ console.log(o.listOrder(Command.Buy))
+ 
+//  console.log(o.listBuyOrder())
 
 
 
