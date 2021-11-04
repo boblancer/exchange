@@ -18,6 +18,47 @@ Run with docker
  - sorted-btree **(B+ tree for internal storage)**
 
 ## Test Suite
+```js
+	describe('OrderBook local integration(input.json output.json)', function() {
+		const input: {[key: string]: any} = require('./input.json');
+		const output: {[key: string]: any} = require('./output.json');
+
+		it('input 1 from input.json return correct output.json', function() {
+			let book = new OrderBook();
+			createOrderFromJson(input[0].orders, book)
+			const expected: OrderBookResponse = output[0]
+
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
+		});
+		it('input 2 from input.json return correct output.json', function() {
+			let book = new OrderBook();
+			createOrderFromJson(input[1].orders, book)
+			const expected: OrderBookResponse = output[1]
+
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
+		});
+
+		it('input 3 from input.json return correct output.json', function() {
+			let book = new OrderBook();
+			createOrderFromJson(input[2].orders, book)
+			const expected: OrderBookResponse = output[2]
+
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
+		});
+
+		it('input 4 from input.json return correct output.json', function() {
+			let book = new OrderBook();
+			createOrderFromJson(input[3].orders, book)
+			const expected: OrderBookResponse = output[3]
+
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
+		});
+	});
+```
 ![image](https://user-images.githubusercontent.com/40311101/139872062-cfb835c8-1a33-4240-9649-9afb26e59d24.png)
 
 ## Internal Reference
