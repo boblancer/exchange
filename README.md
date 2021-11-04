@@ -24,14 +24,46 @@ Run with docker
 ```
 taken from tests/matching_engine/order_book.ts:30
 ```js
-it('input 1 from input.json return correct output.json', function() {
-	let book = new OrderBook();
-	createOrderFromJson(input[0].orders, book)
-	const expected: OrderBookResponse = output[0]
-	
-	let result = JSON.stringify(book.listOrder())
-	console.log(result)
-	assert.equal(result, JSON.stringify(expected));
+describe('OrderBook local integration(input.json output.json)', function() {
+	const input: {[key: string]: any} = require('./input.json');
+	const output: {[key: string]: any} = require('./output.json');
+
+	it('input 1 from input.json return correct output.json', function() {
+		let book = new OrderBook();
+		createOrderFromJson(input[0].orders, book)
+		const expected: OrderBookResponse = output[0]
+
+		let result = JSON.stringify(book.listOrder())
+		console.log(result)
+		assert.equal(result, JSON.stringify(expected));
+	});
+	it('input 2 from input.json return correct output.json', function() {
+		let book = new OrderBook();
+		createOrderFromJson(input[1].orders, book)
+		const expected: OrderBookResponse = output[1]
+
+		let result = JSON.stringify(book.listOrder())
+		assert.equal(result, JSON.stringify(expected));
+	});
+
+	it('input 3 from input.json return correct output.json', function() {
+		let book = new OrderBook();
+		createOrderFromJson(input[2].orders, book)
+		const expected: OrderBookResponse = output[2]
+
+		let result = JSON.stringify(book.listOrder())
+		assert.equal(result, JSON.stringify(expected));
+	});
+
+	it('input 4 from input.json return correct output.json', function() {
+		let book = new OrderBook();
+		createOrderFromJson(input[3].orders, book)
+		const expected: OrderBookResponse = output[3]
+
+		let result = JSON.stringify(book.listOrder())
+		assert.equal(result, JSON.stringify(expected));
+	});
+	});
 });
 ```
 ![image](https://user-images.githubusercontent.com/40311101/140290877-146a07cf-495e-405d-b3ac-eb9da0e09406.png)
