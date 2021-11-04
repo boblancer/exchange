@@ -3,6 +3,7 @@ import {Command} from "../../src/matching_engine/order_book"
 import BTree from "sorted-btree";
 import Limit from "../../src/matching_engine/limit";
 import { OrderRequest } from "../../src/api/model/order_request";
+import { OrderBookResponse } from "../../src/api/model/orderbook_response";
 
 var assert = require('assert');
 var sinon = require("sinon");
@@ -17,124 +18,59 @@ function constructTreeHelper(value: number[][]
 	return tree
 }
 
-function createOrderFromJsonString(input: string[], o: OrderBook){
+function createOrderFromJson(input: OrderRequest[], o: OrderBook){
 	input.forEach(s => {
-			const or: OrderRequest = JSON.parse(s)
-			o.processCommand(or)
+		o.processCommand(s)
 	});
 }
 
 describe('OrderBook', function() {
 	const controlInt = 9999
 
-	describe('OrderBook local integration(data integrity)', function() {
-		var array2DEqual = (a: number[][], b: number[][]) => {
-			return JSON.stringify(a) == JSON.stringify(b);
-		}
-		it('case 1 order creation', function() {
+	describe('OrderBook local integration(input.json output.json)', function() {
+		const input: {[key: string]: any} = require('./input.json');
+		const output: {[key: string]: any} = require('./output.json');
+
+		it('input 1 from input.json return correct output.json', function() {
 			let book = new OrderBook();
-			let cmds = [
-				'{"command": "sell", "price": 100.003, "amount": 2.4}',
-				'{"command": "buy", "price": 90.394, "amount": 3.445}'
-			]
-			createOrderFromJsonString(cmds, book)
+			createOrderFromJson(input[0].orders, book)
+			const expected: OrderBookResponse = output[0]
 
-			let expectedBuyTree = [ [ 3445, 90394 ] ]
-			let expectedSellTree = [ [ 2400, 100003] ]
-
-			assert.ok(array2DEqual(book.listOrder(Command.Buy), expectedBuyTree))
-			assert.ok(array2DEqual(book.listOrder(Command.Sell), expectedSellTree))
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
 		});
-		
-		it('case 2 multiple order creation', function() {
+		it('input 2 from input.json return correct output.json', function() {
 			let book = new OrderBook();
-			let cmds = [
-				'{"command": "sell", "price": 100.003, "amount": 2.4}',
-				'{"command": "buy", "price": 90.394, "amount": 3.445}',
-				'{"command": "buy", "price": 89.394, "amount": 4.3}',
-				'{"command": "sell", "price": 100.013, "amount": 2.2}',
-				'{"command": "buy", "price": 90.15, "amount": 1.305}',
-				'{"command": "buy", "price": 90.394, "amount": 1.0}'        
-		]
-			createOrderFromJsonString(cmds, book)
-	
-			let expectedBuyTree = [ 
-				[ 4445, 90394 ],
-				[ 1305, 90150 ],
-				[ 4300, 89394 ] 
-			]
-			let expectedSellTree = [ 
-				[ 2400, 100003 ],
-				[ 2200, 100013 ] 
-			]
-			
-			assert.ok(array2DEqual(book.listOrder(Command.Buy), expectedBuyTree))
-			assert.ok(array2DEqual(book.listOrder(Command.Sell), expectedSellTree))
+			createOrderFromJson(input[1].orders, book)
+			const expected: OrderBookResponse = output[1]
+
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
 		});
 
-		it('case 3 order fullfilment', function() {
+		it('input 3 from input.json return correct output.json', function() {
 			let book = new OrderBook();
-			let cmds = [
-				'{"command": "sell", "price": 100.003, "amount": 2.4}',
-				'{"command": "buy", "price": 90.394, "amount": 3.445}',
-				'{"command": "buy", "price": 89.394, "amount": 4.3}',
-				'{"command": "sell", "price": 100.013, "amount": 2.2}',
-				'{"command": "buy", "price": 90.15, "amount": 1.305}',
-				'{"command": "buy", "price": 90.394, "amount": 1.0}',
-				'{"command": "sell", "price": 90.394, "amount": 2.2}'  
-		]
-			createOrderFromJsonString(cmds, book)
-	
-			let expectedBuyTree = [ 
-				[ 2245, 90394 ], 
-				[ 1305, 90150 ], 
-				[ 4300, 89394 ] 
-			]
-			let expectedSellTree = [ 
-				[ 2400, 100003 ], 
-				[ 2200, 100013 ] 
-			]
-			
-			assert.ok(array2DEqual(book.listOrder(Command.Buy), expectedBuyTree))
-			assert.ok(array2DEqual(book.listOrder(Command.Sell), expectedSellTree))
+			createOrderFromJson(input[2].orders, book)
+			const expected: OrderBookResponse = output[2]
+
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
 		});
 
-		it('case 4 order fullfilment with partial match', function() {
+		it('input 4 from input.json return correct output.json', function() {
 			let book = new OrderBook();
-			let cmds = [
-				'{"command": "sell", "price": 100.003, "amount": 2.4}',
-				'{"command": "buy", "price": 90.394, "amount": 3.445}',
-				'{"command": "buy", "price": 89.394, "amount": 4.3}',
-				'{"command": "sell", "price": 100.013, "amount": 2.2}',
-				'{"command": "buy", "price": 90.15, "amount": 1.305}',
-				'{"command": "buy", "price": 90.394, "amount": 1.0}',
-				'{"command": "sell", "price": 90.394, "amount": 2.2}',
-				'{"command": "sell", "price": 90.15, "amount": 3.4}',      
-				'{"command": "buy", "price": 91.33, "amount": 1.8}',      
-				'{"command": "buy", "price": 100.01, "amount": 4.0}',        
-				'{"command": "sell", "price": 100.15, "amount": 3.8}' 
-		]
-			createOrderFromJsonString(cmds, book)
+			createOrderFromJson(input[3].orders, book)
+			const expected: OrderBookResponse = output[3]
 
-			let expectedBuyTree = [ 
-				[ 1600, 100010 ], 
-				[ 1800, 91330 ], 
-				[ 150, 90150 ], 
-				[ 4300, 89394 ] 
-			]
-			let expectedSellTree = [
-				[ 2200, 100013 ],
-				[ 3800, 100150 ]
-			]
-			assert.ok(array2DEqual(book.listOrder(Command.Buy), expectedBuyTree))
-			assert.ok(array2DEqual(book.listOrder(Command.Sell), expectedSellTree))
+			let result = JSON.stringify(book.listOrder())
+			assert.equal(result, JSON.stringify(expected));
 		});
 	});
 
 	describe('_processOrder() branching logic', function() {
 		const fillOrderWithReturnValue = {
-				_0: (targetShares: number, limit: number, command: Command) => 0,
-				_1000: (targetShares: number, limit: number, command: Command) => 1000,
+			_0: (targetShares: number, limit: number, command: Command) => 0,
+			_1000: (targetShares: number, limit: number, command: Command) => 1000,
 		};
 
 		const createNewOrder = {
@@ -265,7 +201,7 @@ describe('OrderBook', function() {
 			book.sellTree = constructTreeHelper([[controlInt, 350]], Limit.compareIncreasing)
 
 			book._createNewOrder(controlInt, limit, book.sellTree)
-			assert.equal(book.listOrder(Command.Sell,).length, 1)
+			assert.equal(book.listOrder().sell.length, 1)
 		});
 
 		it('Correctly insert new limit node into the tree', function() {
@@ -275,7 +211,7 @@ describe('OrderBook', function() {
 			book.sellTree = constructTreeHelper([[controlInt, limit1]], Limit.compareIncreasing)
 
 			book._createNewOrder(controlInt, limit2, book.sellTree)
-			assert.equal(book.listOrder(Command.Sell,).length, 2)
+			assert.equal(book.listOrder().sell.length, 2)
 		});
 	});
 

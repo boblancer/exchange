@@ -1,5 +1,7 @@
 import BTree from 'sorted-btree'
 import { OrderRequest } from '../api/model/order_request';
+import { ShareLimitTuple } from '../api/model/share_limit_tuple';
+import { OrderBookResponse } from '../api/model/orderbook_response';
 import Limit from './limit';
 
 export enum Command {
@@ -121,14 +123,23 @@ class OrderBook {
 		}
 	}
 
-	//return list of set of Limit Order where {a, b}
-	// a is shares and b is limit price
-	listOrder(command: Command): number[][]{
-		let retval = this.getTree(command).toArray()
-			.map(
-				x => [x[1].availableShare(), x[0]]
+	listOrder(precision: number=10**3): OrderBookResponse{
+		let convert = (tree: BTree): ShareLimitTuple[] => {
+			let retval = tree.toArray().map(
+				x => {
+					return new ShareLimitTuple(
+						x[0]/precision,
+						x[1].availableShare()/precision
+					)
+				}
 			)
-		return retval
+			return retval
+
+		}
+		var ret = new OrderBookResponse()
+		ret.buy = convert(this.getTree(Command.Buy))
+		ret.sell = convert(this.getTree(Command.Sell))
+		return ret
 	}
 
 	processCommand(order: OrderRequest) {
