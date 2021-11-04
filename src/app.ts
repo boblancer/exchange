@@ -64,14 +64,4 @@ let c2 = [
  console.log("SELL ===================")
  printT(o.sellTree)
 
- console.log("Buy ===================")
- console.log(o.buyTree)
- console.log("SELL ===================")
-
-
- console.log(o.listOrder(Command.Buy))
- 
-//  console.log(o.listBuyOrder())
-
-
-
+ console.log(o.listOrder())
