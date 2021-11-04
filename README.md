@@ -18,7 +18,8 @@ Run with docker
  - sorted-btree **(B+ tree for internal storage)**
 
 ## Testing and validation
-
+Input file is https://github.com/boblancer/exchange/blob/main/tests/matching_engine/input.json
+output file is https://github.com/boblancer/exchange/blob/main/tests/matching_engine/output.json
 ```bash
   to debug the application you may add console log to the new test function
 ```
